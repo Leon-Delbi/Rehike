@@ -1,0 +1,40 @@
+{% macro render(data) %}
+{% import '/common/comments/main.twig' as main %}
+{#{% if yt.hasEvilCommentsExperimentBySatan %}
+<div class="yt-alert yt-alert-actionable yt-alert-warn" style="position: relative;margin: -15px;margin-bottom: 10px;">
+   <div class="yt-alert-icon">
+      <span class="icon master-sprite yt-sprite"></span>
+   </div>
+   <div class="yt-alert-content" role="alert">
+      <div class="yt-alert-message" tabindex="0">
+         You currently have an evil experiment from HELL that breaks comments bad. Functionality may be limited (open a *new* incognito window a few times to hopefully bypass this, same one won't work because of shared cookies). We are working on fixing this so keep an eye on Rehike updates.
+      </div>
+   </div>
+</div>
+{% endif %}#}
+<div id="comment-section-renderer"
+   class="comment-section-renderer "
+
+   data-child-tracking="CAAQg2ciEwj8hczq9ovhAhWBksQKHcGjAPw">
+   {% if data.headerRenderer %}
+      {% from "common/comments/header.twig" import render as header %}
+      {{ header(data.headerRenderer) }}
+   {% endif %}
+   <div class="comment-section-renderer-items" id="comment-section-renderer-items">
+      {# spinner img for switching view #}
+      <span class="yt-spinner-img comment-section-items-loading yt-sprite" title="{{ rehike.i18n.get("global", "loadingIconLabel") }}"></span>
+      {% for item in data.comments.commentThreads %}
+         {{ main.comment_thread(item) }}
+      {% endfor %}
+   </div>
+   {% if data.comments.commentContinuationRenderer %}
+      {{ main.loadMoreWidget(data.comments.commentContinuationRenderer.token) }}
+   {% endif %}
+   {% include '/common/comments/simplebox.twig' %}
+   <div class="feedback-banner hid" aria-live="polite"></div>
+   <span class="yt-spinner-img comment-renderer-loading yt-sprite" title="{{ rehike.i18n.get("global", "loadingIconLabel") }}"></span>
+   <div class="hid" id="comment-renderer-abuse">
+      <div class="comment-renderer-abuse-content"></div>
+   </div>
+</div>
+{% endmacro %}

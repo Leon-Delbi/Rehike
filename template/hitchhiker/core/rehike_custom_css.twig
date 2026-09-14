@@ -1,0 +1,110 @@
+{#
+    Rehike uses custom CSS in some areas to change some small inconsistencies
+    with Hitchhiker's implementation or to style custom implementations.
+#}
+{% if not yt.spf %}
+<style id="rehike-css">
+    .yt-comments-custom-emoji {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        cursor: text;
+    }
+
+    .yt-comments-custom-emoji.large {
+        width: 24px;
+        height: 24px;
+    }
+
+    .video-list-item .stat .published-time::before {
+        content: "\002022";
+        margin: 0 5px;
+    }
+
+    /* Player overwrites this for some reason and it hides channel upsell video show more link */
+    .yt-uix-expander-ellipsis.yt-ui-ellipsis-10::before {
+        top: 0;
+    }
+
+    .yt-uix-expander-ellipsis.yt-ui-ellipsis-10 {
+        max-height: none;
+    }
+
+    /*
+     * Used by the feed nudge renderer, which appears instead of videos on the homepage if the user
+     * is signed out with a fresh visitor data cookie, or has history disabled with no watched videos.
+     */
+    .feed-nudge {
+        padding: 20px;
+    }
+
+    .feed-nudge h1 {
+        margin-bottom: 6px;
+    }
+
+    /*
+     * Used by ponies and possibly other things.
+     */
+    .rh-dark-logo #yt-masthead #logo-container .logo
+    {
+        /* TODO: No way of detecting hidpi in CSS alone yet */
+        background: url("/rehike/static/img/hitchhiker/logo_small_dark_2x.png");
+        background-size: 73px 30px;
+        width: 73.5px;
+        height: 30px;
+    }
+
+    .rh-dark-logo #yt-masthead #logo-container .logo-red
+    {
+        /* TODO: No way of detecting hidpi in CSS alone yet */
+        background: url("/rehike/static/img/hitchhiker/logo_youtube_red_dark_2x.png");
+        background-size: 102px 30px;
+        width: 102px;
+        height: 30px;
+    }
+
+    .exp-invert-logo.rh-dark-logo #yt-masthead #logo-container .logo
+    {
+        background: url("/rehike/static/img/ringo/hitchhiker/logo_small_dark_2x.png");
+        background-size: 100px 30px;
+        width: 100px;
+        height: 30px;
+    }
+
+    .exp-ringo2.rh-dark-logo #yt-masthead #logo-container .logo
+    {
+        background: url("/rehike/static/img/ringo2/hitchhiker/logo_small_dark_2x.png");
+        background-size: 100px 30px;
+        width: 100px;
+        height: 30px;
+    }
+</style>
+{%- if yt.masthead.ponyEasterEgg -%}
+    <style id="rh-ponies-style">
+        {% from "rehike/egg/ponies_css_rules.twig" import render as ponies_css_rules %}
+        {{ ponies_css_rules(yt.masthead.ponyEasterEgg) }}
+    </style>
+    <script type="text/javascript" src="{{ rehike.resource.resolveVersioned("rehike/js/www-ponies.js") }}"></script>
+{%- endif -%}
+{%- if rehike.config.appearance.cssFixes -%}
+<style id="hh-css-fix">
+    #watch-description-text {
+        padding-top: 4px;
+    }
+
+    .comment-replies-renderer-view:hover,
+    .comment-replies-renderer-hide:hover {
+        text-decoration: underline;
+    }
+
+    #watch7-sidebar .video-list-item:hover a:visited .title,
+    #watch7-sidebar .video-list-item:hover a:visited .title .yt-deemphasized-text {
+        color: #167ac6;
+    }
+    
+    .comment-renderer-reply[disabled]:hover, .comment-renderer:hover .comment-renderer-reply[disabled] {
+        opacity: .5;
+    }
+</style>
+{%- endif -%}
+{% endif %}

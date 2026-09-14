@@ -1,0 +1,118 @@
+<?php
+namespace Rehike;
+
+use Rehike\ConfigManager\Config;
+use Rehike\PropertyAtPath;
+
+use Rehike\ConfigManager\Properties\{
+    BoolProp,
+    EnumProp,
+    PropGroup,
+    DependentProp,
+    StringProp
+};
+
+/**
+ * Defines Rehike configuration definitions.
+ * 
+ * @author Isabella Lulamoon <kawapure@gmail.com>
+ * @author The Rehike Maintainers
+ */
+class ConfigDefinitions
+{    
+    public static function getConfigDefinitions(): array
+    {
+        return [
+            "appearance" => [
+                "smallPlayer" => new BoolProp(true),
+                "branding" => new EnumProp("BRANDING_2024_RINGO2", [
+                    "BRANDING_2024_RINGO2",
+                    "BRANDING_2017_RINGO",
+                    "BRANDING_2015"
+                ]),
+                "uploadButtonType" => new EnumProp("MENU", [
+                    "BUTTON",
+                    "ICON",
+                    "MENU"
+                ]),
+                "showNewInfoOnChannelAboutPage" => new BoolProp(true),
+                "largeSearchResults" => new BoolProp(true),
+                "swapSearchViewsAndDate" => new BoolProp(false),
+                "showOldUploadedOnText" => new BoolProp(false),
+                "useLegacyRoboto" => new BoolProp(false),
+                "showVersionInFooter" => new BoolProp(true),
+                "usernamePrepends" => new BoolProp(false),
+                "useRyd" => new BoolProp(true),
+                "enableSponsorblockFixes" => new BoolProp(true),
+                "noViewsText" => new BoolProp(false),
+                "movingThumbnails" => new BoolProp(true),
+                "cssFixes" => new BoolProp(true),
+                "watchSidebarDates" => new BoolProp(false),
+                "watchSidebarVerification" => new BoolProp(false),
+                "oldBestOfYouTubeIcons" => new BoolProp(false),
+                "enableAdblock" => new BoolProp(true),
+            ],
+            "experiments" => [
+                "useSignInV2" => new BoolProp(false),
+                "asyncAttestationRequest" => new BoolProp(true),
+                "disableSignInOnHome" => new BoolProp(false),
+                "tickInjectionForScheduling" => (new BoolProp(false))->registerUpdateCb(function() {
+                    // When this configuration property changes, the contents of the PHP files
+                    // change virtually without being touched on disk, so we just manually
+                    // clear the opcache to recompile the scripts:
+                    if (function_exists("opcache_reset"))
+                        opcache_reset();
+                }),
+                "temp20240827_playerMode" => new EnumProp("USE_WEB_V2", [
+                    "USE_WEB_V2",
+                    "USE_EMBEDDED_PLAYER_REQUEST",
+                    "USE_EMBEDDED_PLAYER_DIRECTLY",
+                ]),
+                "alwaysUseContentPoToken" => new BoolProp(false),
+            ],
+            "advanced" => [
+                "dnsAddress" => new StringProp("1.1.1.1"),
+                "disableSslVerification" => new BoolProp(false),
+                "enableDebugger" => new BoolProp(false),
+                "developer" => [
+                    "ignoreUnresolvedPromises" => new BoolProp(false)
+                ]
+            ],
+            "hidden" => [
+                "language" => new StringProp("en-US"),
+                "securityIgnoreWindowsServerRunningAsSystem" =>
+                    new BoolProp(false),
+                "disableRehike" => new BoolProp(false),
+                "enableProfiler" => new BoolProp(false)
+            ]
+        ];
+    }
+    
+    public static function migrateOldOptions(): void
+    {
+        $changedAnything = false;
+        
+        $migrateAndRemoveOriginal = function(string $prop, \Closure $cb) use (&$changedAnything) {
+            $originalProperty = null;
+            $originalProperty = Config::getConfigProp($prop);
+            if ($originalProperty !== null)
+            {
+                $cb($originalProperty);
+                Config::removeConfigProp($prop);
+                $changedAnything = true;
+            }
+        };
+        
+        $migrateAndRemoveOriginal("appearance.modernLogo", fn($modernLogo) =>
+            Config::setConfigProp("appearance.branding", $modernLogo
+                ? "BRANDING_2024_RINGO2"
+                : "BRANDING_2015"
+            )
+        );
+        
+        if ($changedAnything)
+        {
+            Config::dumpConfig();
+        }
+    }
+}

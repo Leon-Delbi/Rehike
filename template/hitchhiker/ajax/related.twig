@@ -1,0 +1,17 @@
+{#
+    Related AJAX.
+
+    Provides extra watch recommendations (related videos) HTML via SPF.
+#}
+{
+    "body": {
+        "watch-more-related": {% apply json_encode|raw %}
+            {% import "common/watch/sidebar/macros.twig" as sidebar %}
+            {%- for item in yt.page.items -%}
+                {% if item.compactVideoRenderer %}
+                    {{ sidebar.video_item(item) }}
+                {% endif %}
+            {% endfor %}
+        {% endapply %}
+    }
+}

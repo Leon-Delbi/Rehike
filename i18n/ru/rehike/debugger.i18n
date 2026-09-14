@@ -1,0 +1,29 @@
+openButtonLabel: "Отладка"
+openButtonErrorCountSingular: "(1 ошибка)"
+openButtonErrorCountPlural: "(%s ошибок)"
+condensedButtonLabelSingular: >
+  Произошла ошибка. Нажмите, чтобы узнать больше.
+condensedButtonLabelPlural: >
+  Произошло %s ошибок. Нажмите, чтобы узнать больше.
+
+debuggerTitle: "Отладка"
+condensedDebuggerTitle: "Ошибок"
+condensedDebuggerHelpLink: "Что я могу сделать?"
+debuggerClose: "Закрыть"
+
+errorWarning: "Внимание"
+errorError: "Ошибка"
+errorNotice: "Уведомление"
+errorDeprecated: "Устарело"
+
+tabErrorTitle: "Ошибки (%s)"
+tabConsoleTitle: "PHP Консоль"
+tabNetworkTitle: "Сеть"
+tabPerformanceTitle: "Производительность"
+tabYtWalkerTitle: "Просмотр переменных"
+nothingToSee: "Здесь нечего смотреть!"
+
+historyCurrent: "Текущая страница"
+historyPrevious: "Предыдущая страница"
+historyPagesAgo: "# страницы назад"
+historyUnavailable: "История недоступна"

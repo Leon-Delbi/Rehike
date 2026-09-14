@@ -1,0 +1,21 @@
+{## 
+  # Watch Fragments 2 / Comments
+  #
+  # Delivers delayloaded watch comments HTML via SPF.
+  #}
+{
+    "attr": {
+        "masthead-search": {
+            "data-is-crosswalk": "0"
+        }
+    },
+    
+    "body": {
+        "watch-discussion": {% apply json_encode|raw %}
+            {% from "/common/comments/comment_section_renderer.twig" 
+                import render as comment_section_renderer 
+            %}
+            {{ comment_section_renderer(yt.page.commentsRenderer)}}
+        {% endapply %}
+    }
+}

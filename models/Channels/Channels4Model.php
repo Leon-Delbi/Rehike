@@ -649,6 +649,14 @@ class Channels4Model
 
         foreach ($data->contents as $item)
         {
+            // Some community post entries no longer include the actual post
+            // renderer (for example, unavailable or deleted posts). Do not
+            // try to read a property that is not present in those entries.
+            if (!isset($item->backstagePostThreadRenderer->post->backstagePostRenderer))
+            {
+                continue;
+            }
+
             $content = $item->backstagePostThreadRenderer->post->backstagePostRenderer;
 
             $response["backstageRenderer"]["comments"]->commentThreads[] = (object)[

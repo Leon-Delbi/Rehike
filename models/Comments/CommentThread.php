@@ -301,7 +301,8 @@ class CommentThread
 
         $context->isReply = $isReply;
         
-        $authorDisplayName = $this->getDisplayName($context->authorEndpoint->browseEndpoint->browseId);
+        $authorId = $context->authorEndpoint->browseEndpoint->browseId ?? null;
+        $authorDisplayName = $authorId ? $this->getDisplayName($authorId) : null;
 
         if (!is_null($authorDisplayName))
         {
@@ -311,7 +312,7 @@ class CommentThread
         }
 
         // Correct mentions
-        foreach ($context->contentText->runs as $i => &$run)
+        foreach ($context->contentText->runs ?? [] as $i => &$run)
         {
             if ($ucid = @$run->navigationEndpoint->browseEndpoint->browseId)
             {
@@ -330,7 +331,7 @@ class CommentThread
                  * Add a space to the next run if it isn't there. We need to do this
                  * or else some comments will show things like: "@userHi hello".
                  */
-                $nextRun = &$context->contentText->runs[$i + 1];
+                $nextRun = $context->contentText->runs[$i + 1] ?? null;
                 if ($nextRun && substr($nextRun->text, 0, 1) != " ")
                 {
                     $nextRun->text = " " . $nextRun->text;
@@ -339,31 +340,30 @@ class CommentThread
         }
 
         // Forced german hack:
-        if ($text = ParsingUtils::getText($context->publishedTimeText))
+        if ($text = ParsingUtils::getText($context->publishedTimeText ?? null))
         {
             StringTranslationManager::setText(
                 $context->publishedTimeText,
                 StringTranslationManager::convertDate($text)
             );
         }
-        if ($text = ParsingUtils::getText($context->expandButton->buttonRenderer->text))
+        if ($text = ParsingUtils::getText($context->expandButton->buttonRenderer->text ?? null))
         {
             StringTranslationManager::setText(
                 $context->expandButton->buttonRenderer->text,
                 StringTranslationManager::get($text)
             );
         }
-        if ($text = ParsingUtils::getText($context->collapseButton->buttonRenderer->text))
+        if ($text = ParsingUtils::getText($context->collapseButton->buttonRenderer->text ?? null))
         {
             StringTranslationManager::setText(
                 $context->collapseButton->buttonRenderer->text,
                 StringTranslationManager::get($text)
             );
         }
-        if (
-            isset($context->actionButtons->commentActionButtonsRenderer->creatorHeart->creatorHeartRenderer) &&
-            $heart = $context->actionButtons->commentActionButtonsRenderer->creatorHeart->creatorHeartRenderer
-        )
+        $standardActionButtons = $context->actionButtons->commentActionButtonsRenderer ?? null;
+        if (isset($standardActionButtons->creatorHeart->creatorHeartRenderer) &&
+            $heart = $standardActionButtons->creatorHeart->creatorHeartRenderer)
         {
             if ($text = ParsingUtils::getText($heart->heartedTooltip))
             {
@@ -420,8 +420,35 @@ class CommentThread
             );
         }
 
-        $context->likeButton = MVoteButton::fromData(PropertyAtPath::get($context, self::LIKE_BUTTON_PATH));
-        $context->dislikeButton = MVoteButton::fromData(PropertyAtPath::get($context, self::DISLIKE_BUTTON_PATH));
+        $actionButtons = $standardActionButtons
+            ?? ($context->actionButtons->backstageCommentActionButtonsRenderer ?? null);
+
+        if ($actionButtons)
+        {
+            try
+            {
+                $context->likeButton = MVoteButton::fromData(PropertyAtPath::get($actionButtons, "likeButton.toggleButtonRenderer"));
+            }
+            catch (\Rehike\PropertyAtPathException $e)
+            {
+                $context->likeButton = null;
+            }
+
+            try
+            {
+                $context->dislikeButton = MVoteButton::fromData(PropertyAtPath::get($actionButtons, "dislikeButton.toggleButtonRenderer"));
+            }
+            catch (\Rehike\PropertyAtPathException $e)
+            {
+                $context->dislikeButton = null;
+            }
+
+            if (isset($actionButtons->commentButton->buttonRenderer))
+            {
+                $context->commentButton = $actionButtons->commentButton->buttonRenderer;
+            }
+        }
+
 		if (isset($context->voteCount)) $this->addLikeCount($context);
 		
         try
@@ -619,12 +646,26 @@ class CommentThread
          }
         */
 
-        $likeAriaLabel = PropertyAtPath::get($context,
-            self::LIKE_BUTTON_PATH .
-            ".accessibilityData." .
+        $buttonContext = null;
+        if (isset($context->actionButtons->commentActionButtonsRenderer))
+        {
+            $buttonContext = $context->actionButtons->commentActionButtonsRenderer;
+        }
+        else if (isset($context->actionButtons->backstageCommentActionButtonsRenderer))
+        {
+            $buttonContext = $context->actionButtons->backstageCommentActionButtonsRenderer;
+        }
+
+        if (!$buttonContext || !isset($buttonContext->likeButton->toggleButtonRenderer))
+        {
+            return;
+        }
+
+        $likeAriaLabel = PropertyAtPath::get($buttonContext,
+            "likeButton.toggleButtonRenderer.accessibilityData." .
             self::COMMON_A11Y_LABEL
         );
-        
+
         $count = (int)$this->getLikeCountFromLabel($likeAriaLabel);
 
         $context->isLiked = $context->isLiked ?? @$context->likeButton->checked;

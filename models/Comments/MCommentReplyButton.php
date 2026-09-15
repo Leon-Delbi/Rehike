@@ -29,17 +29,18 @@ class MCommentReplyButton extends MButton
         $this->attributes["simplebox-params"] = $data["params"] ?? null;
         $this->attributes["simplebox-label"] = $data["label"] ?? "";
         $this->attributes["placeholder"] = $data["placeholder"] ?? "";
-        $this->isDisabled = $data["isDisabled"];
+        $this->isDisabled = $data["isDisabled"] ?? false;
         $this->text = $data["text"];
     }
 
     public static function fromData($data, $id)
     {
         $dialog = $data->navigationEndpoint->createCommentReplyDialogEndpoint->dialog->commentReplyDialogRenderer ?? null;
-        $params = $dialog->replyButton->buttonRenderer->serviceEndpoint->createCommentReplyEndpoint->createReplyParams ?? "";
-        $label = StringTranslationManager::get(ParsingUtils::getText($dialog->replyButton->buttonRenderer->text));
-        $placeholder = StringTranslationManager::get(ParsingUtils::getText($dialog->placeholderText));
-        $text = $data->text;
+        $replyButton = $dialog?->replyButton?->buttonRenderer;
+        $params = $replyButton?->serviceEndpoint->createCommentReplyEndpoint->createReplyParams ?? "";
+        $label = StringTranslationManager::get(ParsingUtils::getText($replyButton?->text));
+        $placeholder = StringTranslationManager::get(ParsingUtils::getText($dialog?->placeholderText));
+        $text = $data->text ?? (object)["runs" => []];
         // Need to do this or it breaks:
         StringTranslationManager::setText(
             $text,
@@ -51,7 +52,7 @@ class MCommentReplyButton extends MButton
             "label" => $label,
             "placeholder" => $placeholder,
             "text" => $text,
-            "isDisabled" => $data->isDisabled,
+            "isDisabled" => $data->isDisabled ?? false,
         ]);
     }
 }

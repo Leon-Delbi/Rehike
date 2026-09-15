@@ -26,36 +26,40 @@ class MCommentVoteButton extends MButton
 
     public function __construct($data)
     {
-        $this->a11yLabel = $data["a11yLabel"] ?? null;
+        $this->a11yLabel = $data["a11yLabel"] ?? "";
         $this->icon = (object) [];
 
         $this->class[] = "sprite-" . $data["type"];
         $this->class[] = "i-a-v-sprite-" . $data["type"];
 
-        $this->attributes["action-type"] = $data["type"];
-        $this->attributes["action"] = $data["action"];
+        $this->attributes["action-type"] = $data["type"] ?? "";
+        $this->attributes["action"] = $data["action"] ?? "";
         $this->accessibility = (object) [
             "accessibilityData" => (object) [
                 "checked" => $data["checked"] ? "true" : "false"
             ]
         ];
 		$this->checked = $data["checked"];
-        $this->isDisabled = $data["isDisabled"];
+        $this->isDisabled = $data["isDisabled"] ?? false;
     }
 
     public static function fromData($data)
     {
-        $type = strtolower(@$data->defaultIcon->iconType) ?? null;
+        $iconType = $data->defaultIcon->iconType ?? "";
+        $type = strtolower($iconType) ?: "like";
         $checked = $data->isToggled ?? false;
-        $action = $checked ? $data->toggledServiceEndpoint->performCommentActionEndpoint->action : $data->defaultServiceEndpoint->performCommentActionEndpoint->action ?? null;
-        $a11yLabel = $checked ? $data->toggledTooltip : $data->defaultTooltip ?? null;
+        $action = $checked
+            ? ($data->toggledServiceEndpoint->performCommentActionEndpoint->action ?? null)
+            : ($data->defaultServiceEndpoint->performCommentActionEndpoint->action ?? null);
+        $action ??= "";
+        $a11yLabel = $checked ? ($data->toggledTooltip ?? null) : ($data->defaultTooltip ?? null);
 
         return new self([
             "type" => $type,
             "action" => $action,
             "a11yLabel" => $a11yLabel,
             "checked" => $checked,
-            "isDisabled" => $data->isDisabled
+            "isDisabled" => $data->isDisabled ?? false
         ]);
     }
 }

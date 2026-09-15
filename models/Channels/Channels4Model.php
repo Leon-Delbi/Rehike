@@ -13,6 +13,7 @@ use Rehike\i18n\i18n;
 use Rehike\YtApp;
 use Com\Youtube\Innertube\Helpers\VideosContinuationWrapper;
 use Rehike\Model\Channels\Channels4\MHeader;
+use Rehike\Model\Comments\CommentThread;
 
 /**
  * Model bakery for the channels page.
@@ -647,6 +648,10 @@ class Channels4Model
             ]
         ];
 
+        $commentsBakery = new CommentThread((object)[
+            "frameworkUpdates" => $this->getFrameworkUpdatesContext()
+        ]);
+
         foreach ($data->contents as $item)
         {
             // Some community post entries no longer include the actual post
@@ -660,7 +665,9 @@ class Channels4Model
             $content = $item->backstagePostThreadRenderer->post->backstagePostRenderer;
 
             $response["backstageRenderer"]["comments"]->commentThreads[] = (object)[
-                "commentThreadRenderer" => (object)["commentRenderer" => $content]
+                "commentThreadRenderer" => (object)[
+                    "commentRenderer" => $commentsBakery->commentRenderer($content)
+                ]
             ];
         }
 

@@ -47,7 +47,7 @@
    </a>
    {# If we support editing this comment, then we want to encode the text as a HTML attribute
       for the data-editable-content-text attribute. #}
-   {%- if comment.actionMenu.rhButtonsSupported.edit -%}
+   {%- if comment.actionMenu and comment.actionMenu.rhButtonsSupported.edit -%}
       {# This should technically be something like find the edit button and then put
          .menuNavigationItemRenderer.navigationEndpoint.updateCommentReplyDialogEndpoint
          .dialog.commentReplyDialogRenderer.editableText, but this works just as well... #}
@@ -94,6 +94,9 @@
             {% if comment.replyButton %}
             {{ button(comment.replyButton) }}
             {% endif %}
+            {% if comment.commentButton %}
+            {{ button(comment.commentButton) }}
+            {% endif %}
             {% if comment.voteCount and not comment.voteCount.indifferentText == "0" %}
             <span class="comment-renderer-like-count off">{{ comment.voteCount.indifferentText }}</span>
             <span class="comment-renderer-like-count on">{{ comment.voteCount.likedText }}</span>
@@ -101,10 +104,10 @@
             <span class="comment-renderer-like-count on">1</span>
             {% endif %}
             {{ _self.like_button_group(comment) }}
-            {% if comment.actionButtons.commentActionButtonsRenderer.creatorHeart %}
-               {{ _self.creator_heart(comment.actionButtons.commentActionButtonsRenderer.creatorHeart.creatorHeartRenderer)  }}
+            {% if comment.creatorHeart %}
+               {{ _self.creator_heart(comment.creatorHeart)  }}
             {% endif %}
-            {% if rehike.signin.isSignedIn() %}
+            {% if rehike.signin.isSignedIn() and comment.actionMenu %}
             <div class="yt-uix-menu-container comment-renderer-action-menu yt-section-hover-container">
                <div class="yt-uix-menu yt-uix-menu-flipped hide-until-delayloaded">
                   <button class="yt-uix-button yt-uix-button-size-default yt-uix-button-action-menu yt-uix-button-empty yt-uix-button-has-icon no-icon-markup  yt-uix-menu-trigger" type="button" onclick=";return false;" aria-haspopup="true" aria-label="{{ rehike.i18n.get("global", "actionMenuLabel") }}" aria-pressed="false" role="button"><span class="yt-uix-button-arrow yt-sprite"></span></button>
@@ -197,7 +200,7 @@
 <span class="comment-renderer-author-comment-badge creator">
 {% endif %}
    <a href="{{ comment.authorEndpoint.commandMetadata.webCommandMetadata.url }}" class="comment-author-text       spf-link ">{{ rehike.getText(comment.authorText) }}</a>
-{% set verified = comment.authorCommentBadge.authorCommentBadgeRenderer.icon.iconType %}
+{% set verified = comment.authorCommentBadge.authorCommentBadgeRenderer.icon.iconType ?? null %}
 {% if verified and comment.authorIsChannelOwner %}
    <span class="yt-badge comment-author-verified-badge yt-uix-tooltip" title="{{ yt.msgs.verified }}"><span class="yt-comment-author-verified-icon yt-sprite"></span></span>
 {% elseif verified and not comment.authorIsChannelOwner %}
